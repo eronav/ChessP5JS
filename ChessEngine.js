@@ -17,11 +17,20 @@ class GameState {
     ];
     this.whiteToMove = true;
     this.moveLog = [];
+
+    this.wKingPos = [7, 4];
+    this.bKingPos = [0, 4];
   }
   makeMove(move) {
     this.board[move.startRow][move.startCol] = "--";
     this.board[move.endRow][move.endCol] = move.pieceMoved;
     this.moveLog.push(move);
+    // update King pos
+    if (move.pieceMoved == "wK") {
+      this.wKingPos = [move.endRow, move.endCol];
+    } else if (move.pieceMoved == 'bK') {
+      this.bKingPos = [move.endRow, move.endCol];
+    }
     this.whiteToMove = !this.whiteToMove;
   }
   undoMove() {
@@ -29,6 +38,12 @@ class GameState {
       var move = this.moveLog.pop();
       this.board[move.endRow][move.endCol] = move.pieceCaptured;
       this.board[move.startRow][move.startCol] = move.pieceMoved;
+      // update King pos
+      if (move.pieceMoved == "wK") {
+        this.wKingPos = [move.startRow, move.startCol];
+      } else if (move.pieceMoved == 'bK') {
+        this.bKingPos = [move.startRow, move.startCol];
+      }
       this.whiteToMove = !this.whiteToMove;
     }
   }
@@ -173,9 +188,6 @@ class GameState {
   }
   //#endregion
   
-  getValidMoves() { // considering checks
-    return this.getAllPossibleMoves();
-  }
   getAllPossibleMoves() { // ignoring chceks
     var moves = [];
     for (var i = 0; i < this.board.length; i++) {
@@ -209,6 +221,45 @@ class GameState {
       }
     }
     return moves;
+  }
+
+  getValidMoves() { // considering checks
+    // 1. Generate all possible moves
+    var moves = this.getAllPossibleMoves();
+    // 2. for each move, make the move
+    for (var i = moves.length - 1; i >= 0; i--) {
+      this.makeMove(moves[i]);
+      // 3. generate all opponents move
+      // 4. for each of opponents moves, see if they attack YOUR king
+      this.whiteToMove = !this.whiteToMove;
+      if (this.inCheck()) {
+        // 5. if they do, then remove it
+        console.log(moves[i].endRow, moves[i].endCol);
+        moves.splice(i, 1);
+      }
+      this.whiteToMove = !this.whiteToMove;
+      this.undoMove();
+    }
+    return moves;
+  }
+  inCheck() {
+    if (this.whiteToMove) {
+      return this.squareUnderAttack(this.wKingPos);
+    } else {
+      return this.squareUnderAttack(this.bKingPos);
+    }
+  }
+  squareUnderAttack(pos) {
+    this.whiteToMove = !this.whiteToMove; // see opponents moves
+    var oppMoves = this.getAllPossibleMoves();
+    for (var move of oppMoves) {
+      if (move.endRow == pos[0] && move.endCol == pos[1]) {
+        this.whiteToMove = !this.whiteToMove;
+        return true;
+      }
+    }
+    this.whiteToMove = !this.whiteToMove;
+    return false;
   }
 }
 

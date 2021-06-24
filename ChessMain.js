@@ -75,6 +75,9 @@ function mouseClicked() {
     playerClicks = [];
   } else {
     sqSelected = [row, col];
+    if ((gs.board[row][col]).slice(0, 1) == (gs.whiteToMove ? "w" : "b")) { // clicked on your piece to switch
+      playerClicks = [];
+    }
     playerClicks.push(sqSelected);
   }
   if (playerClicks.length == 2) {
