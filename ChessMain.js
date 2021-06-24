@@ -12,6 +12,8 @@ let playerClicks = []; // players clicks - up to 2 elements
 
 var validMoves = [];
 
+var gameOver = false;
+
 function preload() {
   // put all the imgs in images
   var pieces = ["K", "Q", "R", "N", "B", "p"];
@@ -30,6 +32,7 @@ function setup() {
   gs = new GameState();
   DIMENSION = gs.board.length;
   SQ_SIZE = HEIGHT / DIMENSION;
+  validMoves = gs.getValidMoves();
 }
 
 //#region board GUI
@@ -62,12 +65,14 @@ function drawGameState(board) {
 //#endregion
 
 function mouseClicked() {
+  if (gameOver) {
+    return;
+  }
   var row = floor(mouseY / SQ_SIZE);
   var col = floor(mouseX / SQ_SIZE);
   if (row < 0 || row > DIMENSION - 1 || col < 0 || col > DIMENSION - 1) {
     return;
   }
-  validMoves = gs.getValidMoves();
   var moveMade = false;
 
   if (sqSelected[0] == row && sqSelected[1] == col) {
@@ -96,6 +101,9 @@ function mouseClicked() {
   }
   if (moveMade) {
     validMoves = gs.getValidMoves();
+    if (validMoves.length == 0) {
+      gameOver = true;
+    }
   }
 }
 
@@ -108,5 +116,9 @@ function keyPressed() {
 
 function draw() {
   background(0, 0, 255);
+  if (gameOver) {
+    console.log("CHECKMATE");
+    noLoop();
+  }
   drawGameState(gs.board);
 }

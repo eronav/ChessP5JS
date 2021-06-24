@@ -5,15 +5,25 @@ class GameState {
     // board is an 8x8 2D array
     // each element has 2 characters: 1st - color("b", "w"), 2nd - type("K", "Q", "B", "N", "R", "p")
     // string for an empty space is "--"
+    // this.board = [
+    //   ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+    //   ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
+    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
+    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
+    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
+    //   ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+    //   ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
+    // ];
     this.board = [
-      ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-      ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+      ["bK", "--", "--", "--", "--", "--", "--", "--"],
+      ["--", "--", "--", "--", "--", "wQ", "--", "wR"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
-      ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-      ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
+      ["--", "--", "--", "--", "--", "--", "--", "--"],
+      ["--", "--", "--", "--", "--", "--", "--", "--"]
     ];
     this.whiteToMove = true;
     this.moveLog = [];
@@ -234,7 +244,6 @@ class GameState {
       this.whiteToMove = !this.whiteToMove;
       if (this.inCheck()) {
         // 5. if they do, then remove it
-        console.log(moves[i].endRow, moves[i].endCol);
         moves.splice(i, 1);
       }
       this.whiteToMove = !this.whiteToMove;
