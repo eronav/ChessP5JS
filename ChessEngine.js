@@ -5,26 +5,17 @@ class GameState {
     // board is an 8x8 2D array
     // each element has 2 characters: 1st - color("b", "w"), 2nd - type("K", "Q", "B", "N", "R", "p")
     // string for an empty space is "--"
-    // this.board = [
-    //   ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-    //   ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
-    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
-    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
-    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
-    //   ["--", "--", "--", "--", "--", "--", "--", "--"],
-    //   ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
-    //   ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
-    // ];
     this.board = [
-      ["bK", "--", "--", "--", "--", "--", "--", "--"],
-      ["--", "--", "--", "--", "--", "wQ", "--", "wR"],
+      ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+      ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
       ["--", "--", "--", "--", "--", "--", "--", "--"],
-      ["--", "--", "--", "--", "--", "--", "--", "--"],
-      ["--", "--", "--", "--", "--", "--", "--", "--"]
+      ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+      ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
     ];
+
     this.whiteToMove = true;
     this.moveLog = [];
 
@@ -35,30 +26,35 @@ class GameState {
     this.board[move.startRow][move.startCol] = "--";
     this.board[move.endRow][move.endCol] = move.pieceMoved;
     this.moveLog.push(move);
+    this.whiteToMove = !this.whiteToMove;
     // update King pos
     if (move.pieceMoved == "wK") {
       this.wKingPos = [move.endRow, move.endCol];
     } else if (move.pieceMoved == 'bK') {
       this.bKingPos = [move.endRow, move.endCol];
     }
-    this.whiteToMove = !this.whiteToMove;
+    // Pawn promotion
+    if (move.isPawnPromotion) {
+      this.board[move.endRow][move.endCol] = move.pieceMoved.slice(0, 1) + "Q";
+    }
   }
   undoMove() {
     if (this.moveLog.length > 0) {
       var move = this.moveLog.pop();
       this.board[move.endRow][move.endCol] = move.pieceCaptured;
       this.board[move.startRow][move.startCol] = move.pieceMoved;
+      this.whiteToMove = !this.whiteToMove;
       // update King pos
       if (move.pieceMoved == "wK") {
         this.wKingPos = [move.startRow, move.startCol];
       } else if (move.pieceMoved == 'bK') {
         this.bKingPos = [move.startRow, move.startCol];
       }
-      this.whiteToMove = !this.whiteToMove;
     }
   }
 
   //#region calculate piece legalMoves
+  //#region Rook
   calculateRookLegalMoves(r, c) { // starting row and col
     var legalMoves = [];
     var directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
@@ -86,6 +82,8 @@ class GameState {
     }
     return legalMoves;
   }
+  //#endregion
+  //#region Knight
   calculateKnightLegalMoves(r, c) { // starting row and col
     var legalMoves = [];
     var directions = [[-2, -1], [-2, 1], [2, -1], [2, 1], [-1, -2], [1, -2], [-1, 2], [1, 2]];
@@ -107,6 +105,8 @@ class GameState {
     }
     return legalMoves;
   }
+  //#endregion
+  //#region Bishop
   calculateBishopLegalMoves(r, c) { // starting row and col
     var legalMoves = [];
     var directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
@@ -134,12 +134,16 @@ class GameState {
     }
     return legalMoves;
   }
+  //#endregion
+  //#region Queen
   calculateQueenLegalMoves(r, c) { // starting row and col
     var legalBishopMoves = this.calculateBishopLegalMoves(r, c);
     var legalRookMoves = this.calculateRookLegalMoves(r, c);
     var legalMoves = legalBishopMoves.concat(legalRookMoves);
     return legalMoves;
   }
+  //#endregion
+  //#region King
   calculateKingLegalMoves(r, c) { // starting row and col
     var legalMoves = [];
     var directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
@@ -164,6 +168,8 @@ class GameState {
     }
     return legalMoves;
   }
+  //#endregion
+  //#region Pawn
   calculatePawnLegalMoves(r, c) { // starting row and col
     var legalMoves = [];
     var nextRow = this.board[r][c].slice(0, 1) == "w" ? -1 : 1;
@@ -196,6 +202,7 @@ class GameState {
     }
     return legalMoves;
   }
+  //#endregion
   //#endregion
   
   getAllPossibleMoves() { // ignoring chceks
@@ -251,6 +258,7 @@ class GameState {
     }
     return moves;
   }
+  //#region Check
   inCheck() {
     if (this.whiteToMove) {
       return this.squareUnderAttack(this.wKingPos);
@@ -270,6 +278,7 @@ class GameState {
     this.whiteToMove = !this.whiteToMove;
     return false;
   }
+  //#endregion
 }
 
 class Move {
@@ -291,10 +300,13 @@ class Move {
     this.startCol = sqStart[1];
     this.endRow = sqEnd[0];
     this.endCol = sqEnd[1];
-    this.moveID = this.startRow * 1000 + this.startCol * 100 + this.endRow * 10 + this.endCol;
-
     this.pieceMoved = board[this.startRow][this.startCol];
     this.pieceCaptured = board[this.endRow][this.endCol];
+    this.isPawnPromotion = false;
+    if ((this.pieceMoved == 'wp' && this.endRow == 0) || (this.pieceMoved == 'bp' && this.endRow == 7)) {
+      this.isPawnPromotion = true;
+    }
+    this.moveID = this.startRow * 1000 + this.startCol * 100 + this.endRow * 10 + this.endCol;
   }
   getChessNotation() {
     return this.getRankFile(this.startRow, this.startCol) + " --> " + this.getRankFile(this.endRow, this.endCol);

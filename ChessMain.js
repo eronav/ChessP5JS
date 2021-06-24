@@ -80,9 +80,6 @@ function mouseClicked() {
     playerClicks = [];
   } else {
     sqSelected = [row, col];
-    if ((gs.board[row][col]).slice(0, 1) == (gs.whiteToMove ? "w" : "b")) { // clicked on your piece to switch
-      playerClicks = [];
-    }
     playerClicks.push(sqSelected);
   }
   if (playerClicks.length == 2) {
@@ -91,13 +88,16 @@ function mouseClicked() {
     for (var m of validMoves) {
       if (m.isMoveEqual(move)) {
         // it is a valid move
-        gs.makeMove(move);
+        gs.makeMove(m);
         moveMade = true;
+        sqSelected = [];
+        playerClicks = [];
         console.log(move.getChessNotation());
       }
     }
-    sqSelected = [];
-    playerClicks = [];
+    if (!moveMade) {
+      playerClicks = [sqSelected];
+    }
   }
   if (moveMade) {
     validMoves = gs.getValidMoves();
