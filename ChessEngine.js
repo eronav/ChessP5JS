@@ -64,8 +64,9 @@ class GameState {
     }
 
     // update castling rights
+    this.curCastlingRight = CastleRights.copy(this.curCastlingRight);
     this.updateCastleRights(move);
-    this.castleRightsLog.push(CastleRights.copy(this.curCastlingRight));
+    this.castleRightsLog.push(this.curCastlingRight);
     this.whiteToMove = !this.whiteToMove;
   }
   undoMove() {
@@ -345,11 +346,11 @@ class GameState {
     var tempCastlingRights = CastleRights.copy(this.curCastlingRight);  
     // 1. Generate all possible moves
     var moves = this.getAllPossibleMoves();
-    // if (this.whiteToMove) {
-    //   moves = moves.concat(this.getCastlingMoves(this.wKingPos[0], this.wKingPos[1]));
-    // } else {
-    //   moves = moves.concat(this.getCastlingMoves(this.bKingPos[0], this.bKingPos[1]));
-    // }
+    if (this.whiteToMove) {
+      moves = moves.concat(this.getCastlingMoves(this.wKingPos[0], this.wKingPos[1]));
+    } else {
+      moves = moves.concat(this.getCastlingMoves(this.bKingPos[0], this.bKingPos[1]));
+    }
     // 2. for each move, make the move
     for (var i = moves.length - 1; i >= 0; i--) {
       this.makeMove(moves[i]);
