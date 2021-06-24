@@ -93,6 +93,7 @@ function mouseClicked() {
         sqSelected = [];
         playerClicks = [];
         console.log(move.getChessNotation());
+        // console.table(gs.castleRightsLog);
       }
     }
     if (!moveMade) {
