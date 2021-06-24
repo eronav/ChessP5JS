@@ -15,6 +15,16 @@ class GameState {
       ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
       ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
     ];
+    this.control = [
+      ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+      ["bp", "bp", "bp", "bp", "bp", "bp", "bp", "bp"],
+      ["--", "--", "--", "--", "--", "--", "--", "--"],
+      ["--", "--", "--", "--", "--", "--", "--", "--"],
+      ["--", "--", "--", "--", "--", "--", "--", "--"],
+      ["--", "--", "--", "--", "--", "--", "--", "--"],
+      ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
+      ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
+    ];
 
     this.whiteToMove = true;
     this.moveLog = [];
@@ -274,7 +284,7 @@ class GameState {
     return legalMoves;
   }
 
-  getCastlingMoves(r, c) {
+  calculateCastlingMoves(r, c) {
     var moves = [];
     if (this.inCheck()) {
       return moves;
@@ -347,9 +357,9 @@ class GameState {
     // 1. Generate all possible moves
     var moves = this.getAllPossibleMoves();
     if (this.whiteToMove) {
-      moves = moves.concat(this.getCastlingMoves(this.wKingPos[0], this.wKingPos[1]));
+      moves = moves.concat(this.calculateCastlingMoves(this.wKingPos[0], this.wKingPos[1]));
     } else {
-      moves = moves.concat(this.getCastlingMoves(this.bKingPos[0], this.bKingPos[1]));
+      moves = moves.concat(this.calculateCastlingMoves(this.bKingPos[0], this.bKingPos[1]));
     }
     // 2. for each move, make the move
     for (var i = moves.length - 1; i >= 0; i--) {

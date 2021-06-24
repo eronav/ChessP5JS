@@ -14,6 +14,9 @@ var validMoves = [];
 
 var gameOver = false;
 
+var boardColors = [];
+var highlightColors = [];
+
 function preload() {
   // put all the imgs in images
   var pieces = ["K", "Q", "R", "N", "B", "p"];
@@ -33,17 +36,37 @@ function setup() {
   DIMENSION = gs.board.length;
   SQ_SIZE = HEIGHT / DIMENSION;
   validMoves = gs.getValidMoves();
+  boardColors = [color('#FFD3AC'), color('#C86439')];
+  highlightColors = [color('#FFCC3396'), color('#006FFF96')];
 }
 
-//#region board GUI
 function drawBoard() {
   // Draw Squares
   for (var i = 0; i < DIMENSION; i++) { // rows
     for (var j = 0; j < DIMENSION; j++) { // cols
-      var c = (i + j) % 2 == 0 ? color('#FFD3AC') : color('#C86439');
+      var c = boardColors[(i + j) % 2];
       noStroke();
       fill(c);
       rect(SQ_SIZE * j, SQ_SIZE * i, SQ_SIZE, SQ_SIZE);
+    }
+  }
+}
+function highlightSquares(gs, validMoves, sqSelected) {
+  if (sqSelected.length != 0) {
+    var r = sqSelected[0];
+    var c = sqSelected[1];
+    if (gs.board[r][c].slice(0, 1) == (gs.whiteToMove ? "w" : "b")) { // making sure that the square selected is the cur players piece
+      // highlight selected square
+      fill(highlightColors[0]);
+      rect(SQ_SIZE * c, SQ_SIZE * r, SQ_SIZE, SQ_SIZE);
+
+      // highlight that squares legal moves
+      fill(highlightColors[1]);
+      for (var move of validMoves) {
+        if (move.startRow == r && move.startCol == c) {
+          rect(SQ_SIZE * move.endCol, SQ_SIZE * move.endRow, SQ_SIZE, SQ_SIZE);
+        }
+      }
     }
   }
 }
@@ -58,11 +81,11 @@ function drawPieces(board) {
     }
   }
 }
-function drawGameState(board) {
+function drawGameState(gs) {
   drawBoard();
-  drawPieces(board);
+  highlightSquares(gs, validMoves, sqSelected);
+  drawPieces(gs.board);
 }
-//#endregion
 
 function mouseClicked() {
   if (gameOver) {
@@ -112,6 +135,18 @@ function keyPressed() {
     gs.undoMove();
     validMoves = gs.getValidMoves();
   }
+  if (key == 'r') {
+    restartGame();
+  }
+}
+
+function restartGame() {
+  sqSelected = [];
+  playerClicks = [];
+  gs.board = gs.control;
+  gs.whiteToMove = true;
+  validMoves = gs.getValidMoves();
+  gameOver = false;
 }
 
 function draw() {
@@ -120,5 +155,5 @@ function draw() {
     console.log("CHECKMATE");
     noLoop();
   }
-  drawGameState(gs.board);
+  drawGameState(gs);
 }
